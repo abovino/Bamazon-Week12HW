@@ -1,0 +1,19 @@
+{
+  "name": "bamazon-week12hw",
+  "version": "1.0.0",
+  "description": "Week12 HW Bamazon App using Node.js and MySQL",
+  "main": "bamazon-customer.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bov188/Bamazon-Week12HW.git"
+  },
+  "author": "Angelo C. Bovino",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bov188/Bamazon-Week12HW/issues"
+  },
+  "homepage": "https://github.com/bov188/Bamazon-Week12HW#readme"
+}
