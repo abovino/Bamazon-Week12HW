@@ -15,32 +15,60 @@ var connection = mysql.createConnection({
 //Checks for connection error, starts app
 connection.connect(function(err) {
     if (err) throw err;
-    console.log("Connected as ID " + connection.threadID);
-    start();
+    //console.log("Connected as ID " + connection.threadID);
+    console.log(" \n -------------------------------");
+    console.log("* Welcome to Bamazon CMD Store! *");
+    console.log(" -------------------------------\n");
+    startShopping();
 })
 
-var productTable = new Table({
-  head: ['ID#', 'Product Name', 'Department', 'Price', 'Stock'],
-  colWidths: [4, 50, 15, 10, 10],
-  wordWrap:true
-});
-
 //Displays all products in the database
-var start = function() {
-  console.log(" -------------------------------");
-  console.log("* Welcome to Bamazon CMD Store! *");
-  console.log(" -------------------------------\n");
-  var query = 'SELECT * FROM Products';
-  connection.query(query, function(err, res) {
-    
+var startShopping = function() {
+  connection.query('SELECT * FROM Products', function(err, res) {
+    if(err)throw err;
+    var productTable = new Table({
+      head: ['ID#', 'Product Name', 'Department', 'Price', 'Stock'],
+      colWidths: [4, 50, 15, 10, 10],
+      wordWrap:true
+    });
     for (var i = 0; i < res.length; i++) {
-      productTable.push(
-        [res[i].ItemID, res[i].ProductName, res[i].DepartmentName, "$" + res[i].Price, res[i].StockQuantity]
-      );
-      /*
-      console.log("Item ID Number: " + res[i].ItemID + " | " + res[i].ProductName + " | " + res[i].DepartmentName + " | " + res[i].Price + " | " + res[i].StockQuantity + "\n");*/
+      productTable.push([res[i].ItemID, res[i].ProductName, res[i].DepartmentName, "$" + res[i].Price, res[i].StockQuantity]);
     }
     console.log(productTable.toString());
-  })
+    shoppingCart(res);
+  });
+}
 
+var shoppingCart = function(res){
+  inquirer.prompt([{
+    type: "input",
+    name: "choice",
+    message: "What item would you like to purchase?"
+  }]).then(function(val) {
+    var correct = false;
+    for (var i = 0; i < res.length; i++) {
+      if (res[i].ProductName === val.choice) {
+        var correct = true;
+        var product = val.choice;
+        var id = i;
+
+        inquirer.prompt([{
+          type: "input",
+          name: "quantity",
+          message: "\nEnter quantity"
+        }]).then(function(val) {
+          if( (res[id].StockQuantity - val.quantity) > 0) {
+            connection.query('UPDATE products SET StockQuantity="' + (res[id].StockQuantity-val.quantity) + '"WHERE ProductName="' + product + '"', function(err, res2) {
+              if (err) throw err;
+              console.log("\nCheckout complete! Thank you for your order.\n");
+              startShopping();
+            })
+          } else {
+            console.log("\nNot a valid selection! The item that you selected may be out of stuck OR please check to see that you requested a valid product name\n");
+            shoppingCart(res);
+          }
+        })
+      }
+    }
+  })
 }
